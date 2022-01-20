@@ -109,6 +109,7 @@
 	}
 
 	.tooltip {
+		$background-color: rgba(0, 0, 0, 0.8);
 		font-size: 13px;
 		position: absolute;
 		z-index: 1;
@@ -117,10 +118,9 @@
 		transition: .3s ease;
 		text-align: center;
 		pointer-events: none;
-		opacity: 0.8;
 		color: #fff;
 		border-radius: 6px;
-		background-color: #000;
+		background-color: $background-color;
 		box-shadow: rgba(149, 157, 165, 0.6) 0 8px 24px;
 		&:after {
 			font-size: 0;
@@ -136,20 +136,20 @@
 			@include vertical-center;
 		}
 		&.top:after {
-			top: calc(100% - 0.5px);
-			border-top-color: #000;
+			top: 100%;
+			border-top-color: $background-color;
 		}
 		&.bottom:after {
-			bottom: calc(100% - 0.5px);
-			border-bottom-color: #000;
+			bottom: 100%;
+			border-bottom-color: $background-color;
 		}
 		&.left:after {
-			left: calc(100% - 0.5px);
-			border-left-color: #000;
+			left: 100%;
+			border-left-color: $background-color;
 		}
 		&.right:after {
-			right: calc(100% - 0.5px);
-			border-right-color: #000;
+			right: 100%;
+			border-right-color: $background-color;
 		}
 	}
 </style>

@@ -1,128 +1,155 @@
-<!--
-  @author     Lennart Möller <kontakt@lennartmoeller.com>
-  @copyright  2021 Lennart Möller
--->
-
 <script>
-    import {onDestroy} from 'svelte';
+    import {fade} from 'svelte/transition';
 
     /**
-     * The message to display on hover
+     * The DOM element that calls the tooltip
+     */
+    export let element;
+
+    /**
+     * The Tooltip message
      * @type {string}
      */
     export let message;
 
-    /** The tooltip dom element */
-    let tooltip;
-
-    /** The dom element that shows the tooltip on hover */
-    let slot;
-
-    $: setTooltipMessageAndPosition(message); // to reposition the tooltip on message change
+    /**
+     * 'bottom' or 'right'
+     * @type {string}
+     */
+    export let position;
 
     /**
-     * Initializes the element that shows the tooltip on hover
-     * @param e The DOM element
+     * The minimum distance to the window edges
+     * @type {number}
      */
-    function initSlotHover(e) {
-        slot = e.childNodes[0];
-        slot.addEventListener("mouseenter", showTooltip);
-        slot.addEventListener("mouseleave", hideTooltip);
-    }
+    const windowMargin = 10;
 
     /**
-     * Initializes the tooltip DOM element
-     * @param e The tooltip DOM element
+     * The distance to the calling DOM element
+     * @type {number}
      */
-    function initTooltip(e) {
-        tooltip = e;
-        tooltip.parentNode.removeChild(tooltip);
-        tooltip.style.opacity = "";
-    }
+    const elementMargin = 13;
 
-    /** Shows the tooltip */
-    function showTooltip() {
-        if (tooltip.parentNode === null) document.body.appendChild(tooltip);
-        else if (tooltip.parentNode !== document.body) {
-            tooltip.parentNode.removeChild(tooltip);
-            document.body.appendChild(tooltip);
+    /**
+     * Whether the Tooltip is visible or not
+     * @type {boolean}
+     */
+    let visible = false;
+
+    /**
+     * Initializes the tooltip position, separately on every hover
+     * @param tooltip The tooltip DOM element
+     */
+    function initTooltip(tooltip) {
+        const elemDim = element.getBoundingClientRect();
+        const ttDim = tooltip.getBoundingClientRect();
+        if (position === 'bottom' && elemDim.y + elemDim.height + elementMargin + ttDim.height + windowMargin > window.innerHeight) {
+            position = 'top';
         }
-        setTooltipMessageAndPosition();
-        tooltip.style.transitionDelay = ".5s";
-        tooltip.style.opacity = "1";
-    }
+        if (position === 'right' && elemDim.x + elemDim.width + elementMargin + ttDim.width + windowMargin > window.innerWidth) {
+            position = 'left';
+        }
 
-    /** Hides the tooltip */
-    function hideTooltip() {
-        if (!document.body.contains(tooltip)) return;
-        tooltip.style.transitionDelay = "0s";
-        tooltip.style.opacity = "0";
-        setTimeout(() => {
-            if (document.body.contains(tooltip)) {
-                tooltip.parentNode.removeChild(tooltip);
+        function getTopBottom() {
+            if (position === 'top') {
+                return ['auto', window.innerHeight - elemDim.y + elementMargin + 'px'];
             }
-        }, 300);
+            if (position === 'bottom') {
+                return [elemDim.y + elemDim.height + elementMargin + 'px', 'auto'];
+            }
+            if (position === 'left' || position === 'right') {
+                return [elemDim.y + (elemDim.height - ttDim.height) / 2 + 'px', 'auto'];
+            }
+        }
+
+        function getLeftRight() {
+            if (position === 'top' || position === 'bottom') {
+                if (elemDim.x + (elemDim.width - ttDim.width) / 2 < windowMargin) { // too far left
+                    return [windowMargin + 'px', 'auto'];
+                }
+                if (elemDim.x + (elemDim.width + ttDim.width) / 2 + windowMargin > window.innerWidth) { // too far right
+                    return ['auto', windowMargin + 'px'];
+                }
+                return [elemDim.x + (elemDim.width - ttDim.width) / 2 + 'px', 'auto'];
+            }
+            if (position === 'left') {
+                return ['auto', window.innerWidth - elemDim.x + elementMargin + 'px'];
+            }
+            if (position === 'right') {
+                return [elemDim.x + elemDim.width + elementMargin + 'px', 'auto'];
+            }
+        }
+
+        [tooltip.style.top, tooltip.style.bottom] = getTopBottom();
+        [tooltip.style.left, tooltip.style.right] = getLeftRight();
     }
 
-    /**
-     * Sets the message of the tooltip and positions the tooltip
-     * @param msg The tooltip message (only to trigger the function)
-     */
-    function setTooltipMessageAndPosition(msg = message) {
-        if (tooltip === undefined) return;
-        tooltip.innerHTML = message; // set the message to have a correct position
-        const windowMargin = 10;
-        const slotMargin = 5;
-        const slotPos = slot.getBoundingClientRect();
-        const tooltipPos = tooltip.getBoundingClientRect();
-        let tooltipTop = slotPos.y + slotPos.height + slotMargin; // under the slot
-        let tooltipLeft = slotPos.x + (slotPos.width - tooltipPos.width) / 2; // centered
-        let tooltipRight = "auto";
-        if (tooltipLeft < windowMargin) { // foo far left
-            tooltipLeft = windowMargin;
-        } else if (tooltipLeft + tooltipPos.width + windowMargin > window.innerWidth) { // too far right
-            tooltipLeft = "auto";
-            tooltipRight = windowMargin;
-        }
-        if (tooltipTop + tooltipPos.height + windowMargin > window.innerHeight) { // too far down
-            tooltipTop = slotPos.y - slotMargin - tooltipPos.height;
-        }
-        tooltip.style.top = tooltipTop;
-        tooltip.style.left = tooltipLeft;
-        tooltip.style.right = tooltipRight;
-    }
-
-    onDestroy(() => {
-        slot.removeEventListener("mouseenter", showTooltip);
-        slot.removeEventListener("mouseleave", hideTooltip);
-        if (document.body.contains(tooltip)) {
-            tooltip.parentNode.removeChild(tooltip);
-        }
-    })
+    // init the hover event listeners
+    element?.addEventListener('mouseenter', () => visible = true);
+    element?.addEventListener('mouseleave', () => visible = false);
 </script>
 
-<!-- The slot to hover over -->
-<div use:initSlotHover>
-    <slot/>
-</div>
-
-<!-- The tooltip -->
-<div class="tooltip" style="opacity: 0" use:initTooltip></div>
+{#if visible}
+    <div class="tooltip {position}" use:initTooltip transition:fade={{duration: 150}}>
+        {message}
+    </div>
+{/if}
 
 <style lang="scss">
+	@mixin horizontal-center {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	@mixin vertical-center {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
 	.tooltip {
-		font-size: 12px;
+		font-size: 13px;
 		position: absolute;
 		z-index: 1;
 		max-width: 200px;
-		padding: 5px 10px;
-		transition: opacity .3s;
+		padding: 9px 14px;
+		transition: .3s ease;
 		text-align: center;
 		pointer-events: none;
-		opacity: 0;
-		border: 1px solid #eaecef;
+		opacity: 0.8;
+		color: #fff;
 		border-radius: 6px;
-		background-color: white;
-		box-shadow: rgba(149, 157, 165, 0.2) 0 8px 24px;
+		background-color: #000;
+		box-shadow: rgba(149, 157, 165, 0.6) 0 8px 24px;
+		&:after {
+			font-size: 0;
+			line-height: 0;
+			width: 0;
+			content: ' ';
+			border: 6px solid transparent;
+		}
+		&.top:after, &.bottom:after {
+			@include horizontal-center;
+		}
+		&.left:after, &.right:after {
+			@include vertical-center;
+		}
+		&.top:after {
+			top: calc(100% - 0.5px);
+			border-top-color: #000;
+		}
+		&.bottom:after {
+			bottom: calc(100% - 0.5px);
+			border-bottom-color: #000;
+		}
+		&.left:after {
+			left: calc(100% - 0.5px);
+			border-left-color: #000;
+		}
+		&.right:after {
+			right: calc(100% - 0.5px);
+			border-right-color: #000;
+		}
 	}
 </style>

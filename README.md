@@ -1,14 +1,19 @@
-# svelte-tooltips
+# Svelte-Tooltips
+
 A simple and lightweight tooltip component for Svelte 3.
 
 ## Usage
 
-Wrap the tooltip component around a **single** element, for example a div:
+You can use 2 different types of tooltips: 
+
+**tooltipBottom:**
 
 ```
-<Tooltip message="A message on hover">
-    <div class="some-button">
-        Click me
-    </div>
-</Tooltip>
+<div use:tooltipBottom={'The Tooltip message'}>Hello World</div>
+```
+
+**tooltipRight:**
+
+```
+<div use:tooltipRight={'The Tooltip message'}>Hello World</div>
 ```

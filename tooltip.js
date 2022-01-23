@@ -15,7 +15,7 @@ export const tooltipBottom = function (element, message) {
             message: message,
             position: 'bottom'
         }
-    }), 1000);
+    }), 100);
 }
 
 /**

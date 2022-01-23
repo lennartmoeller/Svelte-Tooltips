@@ -82,7 +82,17 @@
 
         [tooltip.style.top, tooltip.style.bottom] = getTopBottom();
         [tooltip.style.left, tooltip.style.right] = getLeftRight();
+        check();
     }
+
+    /**
+     * Removes the Tooltip if the calling element was removed
+     */
+    function check() {
+        if (!document.body.contains(element)) visible = false;
+        else if (visible) setTimeout(check, 100);
+    }
+
 
     // init the hover event listeners
     element?.addEventListener('mouseenter', () => visible = true);

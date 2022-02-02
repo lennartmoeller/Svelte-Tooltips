@@ -9,7 +9,7 @@ import Tooltip from "./Tooltip.svelte";
 export const tooltipBottom = function (element, message) {
     if (message === '') return;
     setTimeout(() => new Tooltip({
-        target: document.getElementsByTagName('body')[0],
+        target: document.body,
         props: {
             element: element,
             message: message,
@@ -27,7 +27,7 @@ export const tooltipBottom = function (element, message) {
 export const tooltipRight = function (element, message) {
     if (message === '') return;
     setTimeout(() => new Tooltip({
-        target: document.getElementsByTagName('body')[0],
+        target: document.body,
         props: {
             element: element,
             message: message,

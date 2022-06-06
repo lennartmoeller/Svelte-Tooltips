@@ -17,7 +17,7 @@ You can import the compiled javascript and css files to prevent compiling issues
 
 Or you import the raw files that you have to compile by yourself:
 
-```sveltehtml
+```javascript
 <script>
     import {bottom, right} from './tooltip';
 </script>

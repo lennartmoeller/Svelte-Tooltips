@@ -34,7 +34,7 @@ const createTooltip = function (position: string, element: HTMLElement, paramete
  * 					   font size: in px (std: 13px),
  * 					   opacity: from 0 to 1 (std: 0.8)
  */
-const bottom = (element: HTMLElement, parameters: string | {
+export const bottom = (element: HTMLElement, parameters: string | {
 	message: string, delay: number | undefined, opacity: number | undefined, fontSize: number | undefined
 }) => createTooltip('bottom', element, parameters);
 
@@ -47,7 +47,7 @@ const bottom = (element: HTMLElement, parameters: string | {
  * 					   font size: in px (std: 13px),
  * 					   opacity: from 0 to 1 (std: 0.8)
  */
-const right = (element: HTMLElement, parameters: string | {
+export const right = (element: HTMLElement, parameters: string | {
 	message: string, delay: number | undefined, opacity: number | undefined, fontSize: number | undefined
 }) => createTooltip('right', element, parameters);
 
